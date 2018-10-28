@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net46;netstandard2.0</TargetFrameworks>
+  </PropertyGroup>
+
+	<ItemGroup>
+		
+		<PackageReference Include="Confluent.Kafka" Version="0.11.6" />
+		<PackageReference Include="librdkafka.redist" Version="0.11.6" />
+		<PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+	  <Reference Include="Rebus">
+	    <HintPath>..\..\..\..\dicko2\Rebus\Rebus\bin\Debug\netstandard2.0\Rebus.dll</HintPath>
+	  </Reference>
+	</ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'net46'">
+		<Reference Include="Rebus">
+			<HintPath>..\..\..\..\dicko2\Rebus\Rebus\bin\Debug\net46\Rebus.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+
+</Project>
