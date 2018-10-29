@@ -16,10 +16,11 @@ using Confluent.Kafka.Serialization;
 using Rebus.Kafka.Exceptions;
 using Rebus.Kafka.Serialization;
 using Rebus.Serialization;
+using Rebus.Subscriptions;
 
 namespace Rebus.Kafka.ApacheKafka
 {
-    public class KafkaTransport : ITransport, IInitializable, IDisposable
+    public class KafkaTransport : ITransport, IInitializable, IDisposable, ISubscriptionStorage
     {
         readonly ILog _log;
         readonly IAsyncTaskFactory _asyncTaskFactory;
@@ -29,19 +30,24 @@ namespace Rebus.Kafka.ApacheKafka
         private ISerializer _customSerializer;
         private string _groupId;
         private ConcurrentBag<string> _knownRoutes;
+        private object _routeLock= new object();
+        private readonly string _topicPrefix;
+
         public KafkaTransport(
             IRebusLoggerFactory rebusLoggerFactory, 
             IAsyncTaskFactory asyncTaskFactory, 
             ISerializer customSerializer, 
             string brokerList,
             string groupId, 
-            ConcurrentBag<string> knownRoutes)
+            ConcurrentBag<string> knownRoutes,
+            string topicPrefix)
         {
             _log = rebusLoggerFactory.GetLogger<KafkaTransport>();
             _brokerList = brokerList;
             _customSerializer = customSerializer;
             _groupId = groupId;
             _knownRoutes = knownRoutes;
+            _topicPrefix = topicPrefix;
             _asyncTaskFactory = asyncTaskFactory ?? throw new ArgumentNullException(nameof(asyncTaskFactory));
         }
 
@@ -104,7 +110,8 @@ namespace Rebus.Kafka.ApacheKafka
             }, cancellationToken);
         }
 
-        public string Address { get; }
+        public string Address => $"{_topicPrefix}_";
+
         public void Initialize()
         {
             var configProducer = new Dictionary<string, object> { { "bootstrap.servers", _brokerList } };
@@ -144,5 +151,29 @@ namespace Rebus.Kafka.ApacheKafka
                 Thread.Sleep(1);
             }
         }
+
+        public async Task<string[]> GetSubscriberAddresses(string topic)
+        {
+            return new[] { $"{_topicPrefix}_{topic}" };
+        }
+
+        public async Task RegisterSubscriber(string topic, string subscriberAddress)
+        {
+            _knownRoutes.Add($"{_topicPrefix}_{topic}");
+            _consumer.Subscribe(_knownRoutes);
+        }
+
+        public async Task UnregisterSubscriber(string topic, string subscriberAddress)
+        {
+            lock (_routeLock)
+            {
+                var del = _knownRoutes.ToList();
+                del.Remove($"{_topicPrefix}_{topic}");
+                _knownRoutes = new ConcurrentBag<string>(del);
+            }
+            _consumer.Subscribe(_knownRoutes);
+        }
+
+        public bool IsCentralized => true;
     }
 }
