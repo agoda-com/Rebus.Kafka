@@ -14,7 +14,7 @@ using Rebus.Tests.Contracts.Transports;
 
 namespace Rebus.Kafka.Tests.Factories
 {
-    class KafkaFactory : IBusFactory
+    public class KafkaFactory : IBusFactory
     {
         readonly List<IDisposable> _stuffToDispose = new List<IDisposable>();
 
