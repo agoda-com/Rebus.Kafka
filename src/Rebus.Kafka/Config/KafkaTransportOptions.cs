@@ -16,16 +16,15 @@ namespace Rebus.Kafka.Config
     public static class KafkaTransportOptions
     {
         public static void UseKafka(this StandardConfigurer<ITransport> configurer,
-            string brokerList, string groupId)
+            string brokerList, string groupId, string topicPrefix)
         {
             configurer.Register(c =>
             {
-                var router = c.Get<IRouter>();
-                if(router == null) throw new Exception("Route not configured");
+                if(string.IsNullOrEmpty(topicPrefix)) throw new ArgumentNullException(nameof(topicPrefix),
+                    $"You must supply a valid value for topicPrefix");
                 var rebusLoggerFactory = c.Get<IRebusLoggerFactory>();
                 var asyncTaskFactory = c.Get<IAsyncTaskFactory>();
-                var listOfTopics = router.GetListOfTopics();
-                return new KafkaTransport(rebusLoggerFactory, asyncTaskFactory, null, brokerList, groupId, new ConcurrentBag<string>(listOfTopics));
+                return new KafkaTransport(rebusLoggerFactory, asyncTaskFactory, null, brokerList, groupId, topicPrefix);
             });
         }
     }

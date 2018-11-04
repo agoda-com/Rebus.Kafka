@@ -4,9 +4,12 @@
     <TargetFrameworks>net46;netcoreapp2.0</TargetFrameworks>
   </PropertyGroup>
 	<ItemGroup>
+		<PackageReference Include="Docker.DotNet" Version="3.125.2" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.8.0" />
 		<PackageReference Include="NSubstitute" Version="3.1.0" />
 		<PackageReference Include="NUnit" Version="3.10.1" />
+		<PackageReference Include="Rebus" Version="5.0.1" />
+		<PackageReference Include="Rebus.Tests.Contracts" Version="5.0.0" />
 		<PackageReference Include="Shouldly" Version="3.0.0" />
 		<PackageReference Include="NUnit3TestAdapter" Version="3.10.0" />
 	</ItemGroup>
@@ -14,14 +17,4 @@
 	  <ProjectReference Include="..\Rebus.Kafka\Rebus.Kafka.csproj" />
 	</ItemGroup>
 
-	<ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-		<Reference Include="Rebus">
-			<HintPath>..\..\..\..\dicko2\Rebus\Rebus\bin\Debug\netstandard2.0\Rebus.dll</HintPath>
-		</Reference>
-	</ItemGroup>
-	<ItemGroup Condition="'$(TargetFramework)' == 'net46'">
-		<Reference Include="Rebus">
-			<HintPath>..\..\..\..\dicko2\Rebus\Rebus\bin\Debug\net46\Rebus.dll</HintPath>
-		</Reference>
-	</ItemGroup>
 </Project>
